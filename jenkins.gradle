@@ -1,6 +1,10 @@
+apply plugin: 'com.terrafolio.jenkins' // manage jenkins plugin
+
 /*
+ * NOTE:
  * we depend on mercurial.gradle - make sure you load it too!
  */
+
 
 jenkins {
     servers {
