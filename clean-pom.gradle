@@ -26,7 +26,7 @@ task pom << {
             // SUBMODULE            
             if (project.parent) {
                 parent {
-                    artifactId "mycreon"
+                    artifactId project.name
                     groupId project.group
                     version project.version
                 }
