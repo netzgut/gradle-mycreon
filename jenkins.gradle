@@ -1,0 +1,35 @@
+/*
+ * we depend on mercurial.gradle - make sure you load it too!
+ */
+
+jenkins {
+    servers {
+        ci {
+            url project.hasProperty("jenkinsServer") ? project.property("jenkinsServer") : ""
+            username project.hasProperty("jenkinsUsername") ? project.property("jenkinsUsername") : ""
+            password project.hasProperty("jenkinsPassword") ? project.property("jenkinsPassword") : ""
+            secure true // optional
+        }
+    }
+
+    templates {
+        build { xml file('jenkins-config-template.xml') }
+    }
+
+    if (ext.has('hgBranch') == false) {
+        throw new RuntimeException("include mercurial.gradle for jenkins.mercurial to work")
+    }
+
+    def branchName = ext.hgBranch();
+    jobs {
+        "build_${branchName}" {
+            server servers.ci
+            definition {
+                name "${project.name}-${branchName.replaceAll('[ /]', '_')}" //optional, no slashes, NO SPACED GODAMMIT
+                xml templates.build.override { projectXml ->
+                    projectXml.scm.revision = branchName
+                }
+            }
+        }
+    }
+}

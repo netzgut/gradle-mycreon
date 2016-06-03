@@ -1,0 +1,13 @@
+ext.hgBranch = {
+    return new File(rootProject.projectDir, ".hg/branch").text.trim()
+}
+
+ext.hgFeature = {
+    def featurePrefix = "feature/"
+    def branch = hgBranch();
+    if (branch.startsWith(featurePrefix)) {
+        def feature = branch.substring(featurePrefix.length()).replaceAll(' ', '_');
+        return feature;
+    }
+    return null;
+}
