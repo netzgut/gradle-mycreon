@@ -26,9 +26,9 @@ task pom << {
             // SUBMODULE            
             if (project.parent) {
                 parent {
-                    artifactId project.name
-                    groupId project.group
-                    version project.version
+                    artifactId project.parent.name
+                    groupId project.parent.name
+                    version project.parent.name
                 }
             }
         }
