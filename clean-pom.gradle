@@ -27,8 +27,8 @@ task pom << {
             if (project.parent) {
                 parent {
                     artifactId project.parent.name
-                    groupId project.parent.groupId
-                    version project.parent.version
+                    groupId project.groupId
+                    version project.version
                 }
             }
         }
