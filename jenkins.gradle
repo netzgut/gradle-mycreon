@@ -34,11 +34,16 @@ jenkins {
     }
 
     def branchName = ext.hgBranch();
+    
+    def buildName = "${project.name}";
+    if (branchName != null) {
+        buildName += "-${branchName.replaceAll('[ /]', '_')}" //optional, no slashes, NO SPACED GODAMMIT
+    }
     jobs {
         "build_${branchName}" {
             server servers.ci
             definition {
-                name "${project.name}-${branchName.replaceAll('[ /]', '_')}" //optional, no slashes, NO SPACED GODAMMIT
+                name buildName
                 xml templates.build.override { projectXml ->
                     projectXml.scm.revision = branchName
                 }
