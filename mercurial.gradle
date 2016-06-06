@@ -1,11 +1,18 @@
 ext.hgBranch = {
-    return new File(rootProject.projectDir, ".hg/branch").text.trim()
+    def branchFile = new File(rootProject.projectDir, ".hg/branch")
+    if (branchFile.exists() == false) {
+        return null;
+    }
+    return branchFile.text.trim()
 }
 
 ext.hgFeature = {
     def featurePrefix = "feature/"
     def branch = hgBranch();
-    if (branch.startsWith(featurePrefix)) {
+    if (branch == null) {
+        return null;
+    }
+    if (branch?.startsWith(featurePrefix)) {
         def feature = branch.substring(featurePrefix.length()).replaceAll(' ', '_');
         return feature;
     }
