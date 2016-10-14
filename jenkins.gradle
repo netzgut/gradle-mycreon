@@ -29,11 +29,11 @@ jenkins {
         build { xml file('jenkins-config-template.xml') }
     }
 
-    if (ext.has('hgBranch') == false) {
-        throw new RuntimeException("include mercurial.gradle for jenkins.mercurial to work")
+    if (ext.has('hgBranch') == false && ext.has('gitBranch') == false) {
+        throw new RuntimeException("include mercurial.gradle or git.gradle for jenkins.mercurial to work")
     }
-
-    def branchName = ext.hgBranch();
+    
+    def branchName = ext.has('gitBranch')? ext.gitBranch() : ext.hgBranch()
     
     def buildName = "${project.name}";
     if (branchName != null) {

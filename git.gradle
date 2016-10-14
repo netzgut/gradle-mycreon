@@ -1,0 +1,20 @@
+ext.gitBranch = {
+    def branchFile = new File(rootProject.projectDir, ".git")
+    if (branchFile.exists() == false) {
+        return null;
+    }
+    return "git branch | grep \\* | cut -d ' ' -f2".execute().text
+}
+
+ext.hgFeature = {
+    def featurePrefix = "feature/"
+    def branch = hgitBranch();
+    if (branch == null) {
+        return null;
+    }
+    if (branch?.startsWith(featurePrefix)) {
+        def feature = branch.substring(featurePrefix.length()).replaceAll(' ', '_');
+        return feature;
+    }
+    return null;
+}
