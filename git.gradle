@@ -1,9 +1,17 @@
 ext.gitBranch = {
     def branchFile = new File(rootProject.projectDir, ".git")
     if (branchFile.exists() == false) {
-        return null;
+        return null
     }
-    return "git branch | grep \\* | cut -d ' ' -f2".execute().text
+    
+    new ByteArrayOutputStream().withStream { os ->
+        def result = exec {
+            executable = "git branch | grep \\* | cut -d ' ' -f2"
+            standardOutput = os
+        }
+        return os.toString()
+    }
+    return null
 }
 
 ext.hgFeature = {
