@@ -4,14 +4,7 @@ ext.gitBranch = {
         return null
     }
     
-    new ByteArrayOutputStream().withStream { os ->
-        def result = exec {
-            executable = "git branch | grep \\* | cut -d ' ' -f2"
-            standardOutput = os
-        }
-        return os.toString()
-    }
-    return null
+   return "git rev-parse --abbrev-ref HEAD".execute().text.replace('\n', '')
 }
 
 ext.hgFeature = {
