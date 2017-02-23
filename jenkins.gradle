@@ -45,7 +45,15 @@ jenkins {
             definition {
                 name buildName
                 xml templates.build.override { projectXml ->
-                    projectXml.scm.revision = branchName
+                    // git
+                    if (ext.has('gitBranch')) {
+                        projectXml.scm.branches.'hudson.plugins.git.BranchSpec'.name = branchName
+                        projectXml.scm.extensions.'hudson.plugins.git.extensions.impl.LocalBranch'.localBranch = branchName
+                    }
+                    // mercurial
+                    else {
+                        projectXml.scm.revision = branchName
+                    }
                 }
             }
         }
