@@ -5,71 +5,75 @@ apply plugin: 'maven'
  * this task writes out a pom.xml file which can be imported as project into eclipse.
  * we don't like the gradle integration in eclipse, it's slow for us. maven is faster.
  */ 
-task pom << {
-    pom {
-        /* 
-         * SET SOURCE ENCODING TO UTF-8 
-         */
-        project {
-            properties { 'project.build.sourceEncoding' 'UTF-8' }
-            
-            // PARENT PROJECT
-            if (subprojects && subprojects.size() > 0) {
-                'modules' {
-                    subprojects.each {
-                        module it.name
+
+
+task pom {
+    doLast {
+        pom {
+            /* 
+             * SET SOURCE ENCODING TO UTF-8 
+             */
+            project {
+                properties { 'project.build.sourceEncoding' 'UTF-8' }
+                
+                // PARENT PROJECT
+                if (subprojects && subprojects.size() > 0) {
+                    'modules' {
+                        subprojects.each {
+                            module it.name
+                        }
+                    }
+                    packaging 'pom'
+                }
+                
+                // SUBMODULE            
+                if (project.parent) {
+                    parent {
+                        artifactId project.parent.name
+                        groupId project.group
+                        version project.version
                     }
                 }
-                packaging 'pom'
             }
             
-            // SUBMODULE            
-            if (project.parent) {
-                parent {
-                    artifactId project.parent.name
-                    groupId project.group
-                    version project.version
+        }.withXml { xmlProvider ->
+            /* 
+             * SORT dependencyies by groupId and artifactId, otherwise their order will change on each invocation 
+             */
+            def node = xmlProvider.asNode()
+            
+            /* 
+             * gradle pom task writes groupId and version for parent project which irritatates eclipse sometimes. 
+             * remove it 
+             */
+            if (node.get('parent')) {
+                node.remove(node.get('groupId'))
+                node.remove(node.get('version'))
+            }
+            
+            def dependenciesNodeList = node.get('dependencies')
+            if (dependenciesNodeList) {
+                def dependenciesNode = dependenciesNodeList.get(0)
+                def dependencyNodeList = dependenciesNode.get('dependency')
+                def sorted = dependencyNodeList.sort { a, b ->
+                    def r = a.get('groupId').text().trim().compareTo(b.get('groupId').text().trim())
+                    if (r != 0) return r
+                    return a.get('artifactId').text().trim().compareTo(b.get('artifactId').text().trim())
                 }
+                dependenciesNode.children().removeAll(dependenciesNode.children())
+                sorted.each { dependenciesNode.append(it) }
             }
-        }
-        
-    }.withXml { xmlProvider ->
-        /* 
-         * SORT dependencyies by groupId and artifactId, otherwise their order will change on each invocation 
-         */
-        def node = xmlProvider.asNode()
-        
-        /* 
-         * gradle pom task writes groupId and version for parent project which irritatates eclipse sometimes. 
-         * remove it 
-         */
-        if (node.get('parent')) {
-            node.remove(node.get('groupId'))
-            node.remove(node.get('version'))
-        }
-        
-        def dependenciesNodeList = node.get('dependencies')
-        if (dependenciesNodeList) {
-            def dependenciesNode = dependenciesNodeList.get(0)
-            def dependencyNodeList = dependenciesNode.get('dependency')
-            def sorted = dependencyNodeList.sort { a, b ->
-                def r = a.get('groupId').text().trim().compareTo(b.get('groupId').text().trim())
-                if (r != 0) return r
-                return a.get('artifactId').text().trim().compareTo(b.get('artifactId').text().trim())
-            }
-            dependenciesNode.children().removeAll(dependenciesNode.children())
-            sorted.each { dependenciesNode.append(it) }
-        }
-        
-        /*
-         * add maven-compiler-plugin for eclipse 
-         */
-
-        def plugin = node.appendNode('build').appendNode('plugins').appendNode('plugin')
-        plugin.appendNode('artifactId').value = 'maven-compiler-plugin'
-        plugin.appendNode('version').value = '3.5.1'
-        def configuration = plugin.appendNode('configuration');
-        configuration.appendNode('source').value = '1.8'
-        configuration.appendNode('target').value = '1.8'
-    }.writeTo("pom.xml")
+            
+            /*
+             * add maven-compiler-plugin for eclipse 
+             */
+    
+            def plugin = node.appendNode('build').appendNode('plugins').appendNode('plugin')
+            plugin.appendNode('artifactId').value = 'maven-compiler-plugin'
+            plugin.appendNode('version').value = '3.5.1'
+            def configuration = plugin.appendNode('configuration');
+            configuration.appendNode('source').value = '1.8'
+            configuration.appendNode('target').value = '1.8'
+        }.writeTo("pom.xml")
+    }
 }
