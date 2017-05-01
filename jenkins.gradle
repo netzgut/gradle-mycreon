@@ -2,18 +2,20 @@ import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin;
 
 buildscript {
     repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://repo.jenkins-ci.org/releases/" }
         jcenter { url "http://jcenter.bintray.com/" }
     }
-    // FG, 2016-06-06: newest version is 1.3.2, but it has missing dependencies
-    dependencies { classpath "com.terrafolio:gradle-jenkins-plugin:1.2.3" }
+ // FG, 2016-06-06: newest version is 1.3.3, but it has missing dependencies
+    dependencies { classpath "com.terrafolio:gradle-jenkins-plugin:1.3.1" }
 }
+// FG, 2016-06-06: in plugin-scripts you can not (yet) use the plugin id
 
-// FG, 2016-06-06: in plugin-scripts you can not (yet) use the plugin id, you have to use the actual type
-apply plugin: JenkinsPlugin
+
 
 /*
  * NOTE:
- * we depend on mercurial.gradle - make sure you load it too!
+ * we depend on git.gradle - make sure you load it too!
  */
 jenkins {
     servers {
@@ -29,12 +31,11 @@ jenkins {
         build { xml file('jenkins-config-template.xml') }
     }
 
-    if (ext.has('hgBranch') == false && ext.has('gitBranch') == false) {
-        throw new RuntimeException("include mercurial.gradle or git.gradle for jenkins.mercurial to work")
+    if (ext.has('gitBranch') == false) {
+        throw new RuntimeException("include git.gradle for jenkins.gradle to work")
     }
-    
+
     def branchName = ext.has('gitBranch') ? ext.gitBranch() : ext.hgBranch()
-    
     def buildName = "${project.name}";
     if (branchName != null) {
         buildName += "-${branchName.replaceAll('[ /]', '_')}" //optional, no slashes, NO SPACED GODAMMIT
@@ -45,14 +46,12 @@ jenkins {
             definition {
                 name buildName
                 xml templates.build.override { projectXml ->
-                    // git
-                    if (ext.has('gitBranch')) {
-                        projectXml.scm.branches.'hudson.plugins.git.BranchSpec'.name = branchName
-                        projectXml.scm.extensions.'hudson.plugins.git.extensions.impl.LocalBranch'.localBranch = branchName
-                    }
-                    // mercurial
-                    else {
-                        projectXml.scm.revision = branchName
+                    projectXml.scm.branches.replaceNode { node ->
+                        branches() {
+                            'hudson.plugins.git.BranchSpec'() {
+                                name([:], "*/${branchName}")
+                            }
+                        }
                     }
                 }
             }
