@@ -46,13 +46,9 @@ jenkins {
             definition {
                 name buildName
                 xml templates.build.override { projectXml ->
-                    projectXml.scm.branches.replaceNode { node ->
-                        branches() {
-                            'hudson.plugins.git.BranchSpec'() {
-                                name([:], "*/${branchName}")
-                            }
-                        }
-                    }
+                    projectXml.scm.branches.'hudson.plugins.git.BranchSpec'.name = "*/${branchName}"
+                    // this is necessary for git.gradle to tell the current branch name!
+                    projectXml.scm.extensions.'hudson.plugins.git.extensions.impl.LocalBranch'.localBranch = branchName
                 }
             }
         }
