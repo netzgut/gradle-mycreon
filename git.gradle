@@ -3,8 +3,20 @@ ext.gitBranch = {
     if (branchFile.exists() == false) {
         return null
     }
-    
-   return "git rev-parse --abbrev-ref HEAD".execute().text.replace('\n', '')
+
+    def result = "git rev-parse --abbrev-ref HEAD".execute().text.replace('\n', '')
+
+    // special case for jenkins pipeline jobs
+    if (result == null || result != "HEAD") {
+        return result;
+    }
+    def revParseHead = "git rev-parse HEAD".execute().text.replace('\n', '')
+    def heads = "git ls-remote --heads origin".execute().text
+    def head = heads.split("\n").findAll { it.startsWith(revParseHead) }[0]
+    def prefix = "refs/heads/"
+    println "heads: ---${heads}---"
+    println "head: ---${head}---"
+    return head.substring(head.indexOf(prefix) + prefix.length())
 }
 
 ext.hgFeature = {
