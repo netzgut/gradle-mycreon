@@ -35,7 +35,6 @@ task pom {
                     }
                 }
             }
-            
         }.withXml { xmlProvider ->
             /* 
              * SORT dependencyies by groupId and artifactId, otherwise their order will change on each invocation 
@@ -49,6 +48,18 @@ task pom {
             if (node.get('parent')) {
                 node.remove(node.get('groupId'))
                 node.remove(node.get('version'))
+            }
+
+            /*
+             * We need to add the compileOnly dependencies manually, maven-plugin isn't supporting it.
+             */
+            project.configurations.compileOnly.allDependencies.each { dep ->
+                asNode().dependencies[0].appendNode('dependency').with {
+                    it.appendNode('groupId', dep.group)
+                    it.appendNode('artifactId', dep.name)
+                    it.appendNode('version', dep.version)
+                    it.appendNode('scope', 'provided')
+                }
             }
             
             def dependenciesNodeList = node.get('dependencies')
@@ -71,9 +82,9 @@ task pom {
             def plugin = node.appendNode('build').appendNode('plugins').appendNode('plugin')
             plugin.appendNode('artifactId').value = 'maven-compiler-plugin'
             plugin.appendNode('version').value = '3.5.1'
-            def configuration = plugin.appendNode('configuration');
+            def configuration = plugin.appendNode('configuration')
             configuration.appendNode('source').value = '1.8'
             configuration.appendNode('target').value = '1.8'
-        }.writeTo("pom.xml")
+        }.writeTo('pom.xml')
     }
 }
