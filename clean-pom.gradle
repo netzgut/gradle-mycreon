@@ -78,13 +78,23 @@ task pom {
             /*
              * add maven-compiler-plugin for eclipse 
              */
-    
+
             def plugin = node.appendNode('build').appendNode('plugins').appendNode('plugin')
             plugin.appendNode('artifactId').value = 'maven-compiler-plugin'
-            plugin.appendNode('version').value = '3.5.1'
+            plugin.appendNode('version').value = '3.7.0'
             def configuration = plugin.appendNode('configuration')
-            configuration.appendNode('source').value = '1.8'
-            configuration.appendNode('target').value = '1.8'
+            if (project.sourceCompatibility.isJava10Compatible()) {
+                configuration.appendNode('source').value = project.sourceCompatibility.getMajorVersion()
+            }
+            else {
+                configuration.appendNode('source').value = project.sourceCompatibility
+            }
+            if (project.targetCompatibility.isJava10Compatible()) {
+                configuration.appendNode('target').value = project.targetCompatibility.getMajorVersion()
+            }
+            else {
+                configuration.appendNode('target').value = project.targetCompatibility
+            }
         }.writeTo('pom.xml')
     }
 }
