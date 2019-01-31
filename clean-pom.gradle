@@ -73,6 +73,16 @@ task pom {
                 }
                 dependenciesNode.children().removeAll(dependenciesNode.children())
                 sorted.each { dependenciesNode.append(it) }
+
+                if (project.hasProperty('addTestJars')) {
+                    dependenciesNode.children().each {
+                        def groupId = it.get('groupId').text()
+                        def qualifiedName = groupId + '.' + it.get('artifactId')
+                        if (project.addTestJars.contains(groupId) || project.addTestJars.contains(qualifiedName)) {
+                            it.appendNode('type', 'test-jar')
+                        }
+                    }
+                }
             }
             
             /*
