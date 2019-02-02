@@ -76,9 +76,10 @@ task pom {
 
                 if (project.hasProperty('addTestJars')) {
                     dependenciesNode.children().each {
-                        def groupId = it.get('groupId').text()
-                        def qualifiedName = groupId + '.' + it.get('artifactId').text()
-                        if (project.addTestJars.contains(groupId) || project.addTestJars.contains(qualifiedName)) {
+                        def groupId = it.get('groupId').text().trim()
+                        def artifactId = it.get('artifactId').text().trim()
+                        def fullId = groupId + '.' + artifactId
+                        if (project.addTestJars.contains(groupId) || project.addTestJars.contains(fullId)) {
                             it.appendNode('type', 'test-jar')
                         }
                     }
