@@ -25,8 +25,8 @@ task pom {
                     }
                     packaging 'pom'
                 }
-                
-                // SUBMODULE            
+
+                // SUBMODULE
                 if (project.parent) {
                     parent {
                         artifactId project.parent.name
@@ -40,7 +40,7 @@ task pom {
              * SORT dependencyies by groupId and artifactId, otherwise their order will change on each invocation 
              */
             def node = xmlProvider.asNode()
-            
+
             /* 
              * gradle pom task writes groupId and version for parent project which irritatates eclipse sometimes. 
              * remove it 
@@ -61,7 +61,7 @@ task pom {
                     it.appendNode('scope', 'provided')
                 }
             }
-            
+
             def dependenciesNodeList = node.get('dependencies')
             if (dependenciesNodeList) {
                 def dependenciesNode = dependenciesNodeList.get(0)
@@ -77,14 +77,14 @@ task pom {
                 if (project.hasProperty('addTestJars')) {
                     dependenciesNode.children().each {
                         def groupId = it.get('groupId').text()
-                        def qualifiedName = groupId + '.' + it.get('artifactId')
+                        def qualifiedName = groupId + '.' + it.get('artifactId').text()
                         if (project.addTestJars.contains(groupId) || project.addTestJars.contains(qualifiedName)) {
                             it.appendNode('type', 'test-jar')
                         }
                     }
                 }
             }
-            
+
             /*
              * add maven-compiler-plugin for eclipse 
              */
