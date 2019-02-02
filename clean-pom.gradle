@@ -65,6 +65,32 @@ task pom {
             def dependenciesNodeList = node.get('dependencies')
             if (dependenciesNodeList) {
                 def dependenciesNode = dependenciesNodeList.get(0)
+
+                /*
+                 * Newer Eclipse versions need test-jars if you want to share test code.
+                 * Just adding "type: test-jar" isn't enough, project won't run anymore,
+                 * we have to duplicate the dependency instead.
+                 */
+                if (project.hasProperty('addTestJars')) {
+                    for (def i = 0; i < dependenciesNode.children().size(); i++) {
+                        def child = dependenciesNode.children().get(i)
+                        def groupId = child.get('groupId').text().trim()
+                        def artifactId = child.get('artifactId').text().trim()
+                        def fullId = groupId + '.' + artifactId
+                        if (project.addTestJars.contains(groupId) || project.addTestJars.contains(fullId)) {
+                            if (child.get('scope').text().trim().equals('tests') == false) {
+                                dependenciesNode.appendNode('dependency').with {
+                                    it.appendNode('groupId', child.get('groupId').text().trim())
+                                    it.appendNode('artifactId', child.get('artifactId').text().trim())
+                                    it.appendNode('version', child.get('version').text().trim())
+                                    it.appendNode('scope', 'tests')
+                                    it.appendNode('type', 'test-jar')
+                                }
+                            }
+                        }
+                    }
+                }
+
                 def dependencyNodeList = dependenciesNode.get('dependency')
                 def sorted = dependencyNodeList.sort { a, b ->
                     def r = a.get('groupId').text().trim().compareTo(b.get('groupId').text().trim())
@@ -74,16 +100,7 @@ task pom {
                 dependenciesNode.children().removeAll(dependenciesNode.children())
                 sorted.each { dependenciesNode.append(it) }
 
-                if (project.hasProperty('addTestJars')) {
-                    dependenciesNode.children().each {
-                        def groupId = it.get('groupId').text().trim()
-                        def artifactId = it.get('artifactId').text().trim()
-                        def fullId = groupId + '.' + artifactId
-                        if (project.addTestJars.contains(groupId) || project.addTestJars.contains(fullId)) {
-                            it.appendNode('type', 'test-jar')
-                        }
-                    }
-                }
+            
             }
 
             /*
