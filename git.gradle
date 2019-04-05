@@ -16,6 +16,9 @@ ext.gitBranch = {
     def prefix = "refs/heads/"
     println "heads: ---${heads}---"
     println "head: ---${head}---"
+    if (head == null) {
+        return null
+    }
     return head.substring(head.indexOf(prefix) + prefix.length())
 }
 
