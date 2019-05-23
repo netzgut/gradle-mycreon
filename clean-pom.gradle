@@ -127,7 +127,7 @@ task pom {
             def annotationProcessorPath = configuration.appendNode('annotationProcessorPaths').appendNode('path')
             annotationProcessorPath.appendNode('groupId').value = 'org.immutables'
             annotationProcessorPath.appendNode('artifactId').value = 'value'
-            annotationProcessorPath.appendNode('version').value = '2.7.3'
+            annotationProcessorPath.appendNode('version').value = '2.7.4'
         }.writeTo('pom.xml')
     }
 }
