@@ -108,8 +108,9 @@ task pom {
              */
 
             def plugin = node.appendNode('build').appendNode('plugins').appendNode('plugin')
+            plugin.appendNode('groupId').value = 'org.apache.maven.plugins'
             plugin.appendNode('artifactId').value = 'maven-compiler-plugin'
-            plugin.appendNode('version').value = '3.7.0'
+            plugin.appendNode('version').value = '3.8.0'
             def configuration = plugin.appendNode('configuration')
             if (project.sourceCompatibility.isJava10Compatible()) {
                 configuration.appendNode('source').value = project.sourceCompatibility.getMajorVersion()
@@ -123,6 +124,10 @@ task pom {
             else {
                 configuration.appendNode('target').value = project.targetCompatibility
             }
+            def annotationProcessorPath = configuration.appendNode('annotationProcessorPaths').appendNode('path')
+            annotationProcessorPath.appendNode('groupId').value = 'org.immutables'
+            annotationProcessorPath.appendNode('artifactId').value = 'value'
+            annotationProcessorPath.appendNode('version').value = '2.7.3'
         }.writeTo('pom.xml')
     }
 }
