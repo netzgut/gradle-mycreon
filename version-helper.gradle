@@ -1,0 +1,85 @@
+// from: https://gist.github.com/michaellihs/a6621376393821d6d206ccfc8dbf86ec
+
+buildscript {
+    repositories {
+        jcenter {
+            url "http://jcenter.bintray.com/"
+        }
+    }
+    dependencies {
+        classpath 'org.ajoberstar.grgit:grgit-core:3.1.1'
+    }
+}
+
+enum PatchLevel {
+    MAJOR, MINOR, PATCH
+}
+
+class SemVer implements Serializable {
+
+    private int major, minor, patch
+
+    SemVer(String version) {
+        def versionParts = version.tokenize('.')
+        if (versionParts.size != 3) {
+            throw new IllegalArgumentException("Wrong version format - expected MAJOR.MINOR.PATCH - got ${version}")
+        }
+        this.major = versionParts[0].toInteger()
+        this.minor = versionParts[1].toInteger()
+        this.patch = versionParts[2].toInteger()
+    }
+
+    SemVer(int major, int minor, int patch) {
+        this.major = major
+        this.minor = minor
+        this.patch = patch
+    }
+
+    SemVer bump(PatchLevel patchLevel) {
+        switch (patchLevel) {
+            case PatchLevel.MAJOR:
+                return new SemVer(major + 1, 0, 0)
+                break
+            case PatchLevel.MINOR:
+                return new SemVer(major, minor + 1, 0)
+                break
+            case PatchLevel.PATCH:
+                return new SemVer(major, minor, patch + 1)
+                break
+        }
+        return new SemVer()
+    }
+
+    String toString() {
+        return "${major}.${minor}.${patch}"
+    }
+
+}
+
+// Project version based on tags
+
+import javax.naming.AuthenticationException
+import org.ajoberstar.grgit.Grgit
+import org.ajoberstar.grgit.Credentials
+
+ext.projectVersionHelper = { snapshot=true ->
+    def grgit = Grgit.open()
+    def branch = grgit.branch.current().name
+    // format: "TAG-DISTANCE-gHASH"
+    def tag = grgit.describe().split("-")[0]
+    if (branch == "master") {
+        return tag;
+    }
+    def semVer = new SemVer(tag)
+    semVer = semVer.bump(PatchLevel.PATCH)
+    def version = semVer.toString()
+    def SN="-SNAPSHOT"
+    if (snapshot == false) {
+        SN=""
+    }
+    if (branch.startsWith("feature/")) {
+        def feature = branch.substring("feature/".length())
+        return "$version-$feature$SN"
+    }
+    return "$version$SN"
+}
