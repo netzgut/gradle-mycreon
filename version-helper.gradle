@@ -70,6 +70,9 @@ ext.projectVersionHelper = { snapshot=true ->
     if (branch == "master") {
         return tag;
     }
+    if (branch.startsWith("release/")) {
+        return branch.substring("release/".length())
+    }
     def semVer = new SemVer(tag)
     semVer = semVer.bump(PatchLevel.PATCH)
     def version = semVer.toString()
@@ -82,4 +85,22 @@ ext.projectVersionHelper = { snapshot=true ->
         return "$version-$feature$SN"
     }
     return "$version$SN"
+}
+
+ext.findDependencyVersion = { projectName, snapshot=true ->
+    def grgit = Grgit.open(dir: "../$projectName")
+    def branch = grgit.branch.current().name
+    // format: "TAG-DISTANCE-gHASH"
+    def tag = grgit.describe().split("-")[0]
+    if (snapshot == false) {
+        return tag;
+    }
+    def semVer = new SemVer(tag)
+    semVer = semVer.bump(PatchLevel.PATCH)
+    def version = semVer.toString()
+    if (branch.startsWith("feature/")) {
+        def feature = branch.substring("feature/".length())
+        return "$version-$feature-SNAPSHOT"
+    }
+    return "$version-SNAPSHOT"
 }
