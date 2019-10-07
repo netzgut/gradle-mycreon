@@ -63,7 +63,7 @@ import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.Credentials
 
 ext.projectVersionHelper = { snapshot=true ->
-    def grgit = Grgit.open(projectDir)
+    def grgit = Grgit.open(dir: projectDir)
     def branch = grgit.branch.current().name
     // format: "TAG-DISTANCE-gHASH"
     def tag = grgit.describe().split("-")[0]
