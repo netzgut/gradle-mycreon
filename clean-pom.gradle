@@ -124,10 +124,20 @@ task pom {
             else {
                 configuration.appendNode('target').value = project.targetCompatibility
             }
-            def annotationProcessorPath = configuration.appendNode('annotationProcessorPaths').appendNode('path')
-            annotationProcessorPath.appendNode('groupId').value = 'org.immutables'
-            annotationProcessorPath.appendNode('artifactId').value = 'value'
-            annotationProcessorPath.appendNode('version').value = '2.7.5'
+
+            /**
+             * Add annotation processors
+             */
+             if (project.configurations.annotationProcessor.allDependencies.isEmpty() == false) {
+                def annotationProcessorPaths = configuration.appendNode('annotationProcessorPaths')
+                project.configurations.annotationProcessor.allDependencies.each { dep ->
+                    annotationProcessorPaths.appendNode('path').with {
+                        it.appendNode('groupId', dep.group)
+                        it.appendNode('artifactId', dep.name)
+                        it.appendNode('version', dep.version)
+                    }
+                }
+            }
         }.writeTo('pom.xml')
     }
 }
