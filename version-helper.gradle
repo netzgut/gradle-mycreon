@@ -68,12 +68,13 @@ ext.projectVersionHelper = { snapshot=true ->
     // format: "TAG-DISTANCE-gHASH"
     def description = grgit.describe()
 
-    // we default to 0.0.0 if no release exists so far
-    def tag = "0.0.0"
+    // we default to 1.0.0 if no release exists so far
+    def tag = "1.0.0"
+    def hasVersion = false
     if (description != null) {
         tag = description.split("-")[0]
+        hasVersion = true
     }
-
     if (branch == "master") {
         return tag
     }
@@ -82,7 +83,11 @@ ext.projectVersionHelper = { snapshot=true ->
         return branch.substring("release/".length())
     }
 
-    def semVer = new SemVer(tag).bump(PatchLevel.PATCH)
+    def semVer = new SemVer(tag)
+    if (hasVersion) {
+        semVer = semVer.bump(PatchLevel.PATCH)
+    }
+
     def version = semVer.toString()
 
     def SN="-SNAPSHOT"
@@ -103,13 +108,19 @@ ext.findDependencyVersion = { projectName, snapshot=true ->
     // format: "TAG-DISTANCE-gHASH"
     def description = grgit.describe()
 
-    // we default to 0.0.0 if no release exists so far
-    def tag = "0.0.0"
+    // we default to 1.0.0 if no release exists so far
+    def tag = "1.0.0"
+    def hasVersion = false
     if (description != null) {
         tag = description.split("-")[0]
+        hasVersion = true
     }
 
-    def semVer = new SemVer(tag).bump(PatchLevel.PATCH)
+    def semVer = new SemVer(tag)
+    if (hasVersion) {
+        semVer = semVer.bump(PatchLevel.PATCH)
+    }
+
     def version = semVer.toString()
 
     def SN="-SNAPSHOT"
