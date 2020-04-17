@@ -157,3 +157,9 @@ task releaseVersions {
         }
     }
 }
+
+task version {
+    doLast {
+        println project.version
+    }
+}
