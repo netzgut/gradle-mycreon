@@ -104,3 +104,28 @@ ext.findDependencyVersion = { projectName, snapshot=true ->
     }
     return "$version-SNAPSHOT"
 }
+
+task updateVersions {
+    doLast {
+        def fileContent = "# WARNING! This file will be overwritten by task 'updateVersions'"
+        projectDependencies.split(',').each {
+            def version = findDependencyVersion(it, project.version.contains("SNAPSHOT"))
+            fileContent += "\n${it}Version=${version}"
+        }
+        fileContent += "\nprojectDependencies=${projectDependencies}"
+        new File(projectDir, "gradle.properties").text = fileContent
+    }
+}
+
+task releaseVersion {
+    doLast { println projectVersionHelper(false) }
+}
+
+task releaseVersions {
+    doLast {
+        println "Project: ${projectVersionHelper(false)}"
+        projectDependencies.split(',').each {
+            println "${it}: ${findDependencyVersion(it, false)}"
+        }
+    }
+}
