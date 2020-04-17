@@ -144,12 +144,13 @@ task updateVersions {
 }
 
 task releaseVersion {
-    doLast { println projectVersionHelper(false) }
+    doLast {
+        println projectVersionHelper(false)
+    }
 }
 
-task releaseVersions {
+task dependencyReleaseVersions {
     doLast {
-        println "Project: ${projectVersionHelper(false)}"
         if (projectDependencies != null) {
             projectDependencies.split(',').each {
                 println "${it}: ${findDependencyVersion(it, false)}"
