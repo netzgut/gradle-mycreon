@@ -117,16 +117,16 @@ ext.findDependencyVersion = { projectName, snapshot=true ->
     }
 
     def semVer = new SemVer(tag)
-    if (hasVersion) {
-        semVer = semVer.bump(PatchLevel.PATCH)
-    }
-
-    def version = semVer.toString()
 
     def SN="-SNAPSHOT"
     if (snapshot == false) {
         SN=""
     }
+    else if (hasVersion) {
+        semVer = semVer.bump(PatchLevel.PATCH)
+    }
+    
+    def version = semVer.toString()
 
     if (branch.startsWith("feature/")) {
         def feature = branch.substring("feature/".length())
