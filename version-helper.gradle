@@ -145,6 +145,10 @@ ext.readVersions = {
 
 task updateVersions {
     doLast {
+        if (project.hasProperty('projectDependencies') == false) {
+            return
+        }
+
         def fileContent = "# WARNING! This file will be overwritten by task 'updateVersions'"
         projectDependencies.split(',').each {
             def version = findDependencyVersion(it, project.version.contains("SNAPSHOT"))
@@ -162,10 +166,14 @@ task releaseVersion {
 
 task dependencyReleaseVersions {
     doLast {
-        if (projectDependencies != null) {
-            projectDependencies.split(',').each {
-                println "${it}: ${findDependencyVersion(it, false)}"
-            }
+        if (project.hasProperty('projectDependencies') == false) {
+            return
+        }
+        if (projectDependencies == null) {
+            return
+        }
+        projectDependencies.split(',').each {
+            println "${it}: ${findDependencyVersion(it, false)}"
         }
     }
 }
