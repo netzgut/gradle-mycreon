@@ -102,7 +102,7 @@ ext.projectVersionHelper = { snapshot=true ->
 }
 
 ext.findDependencyVersion = { projectName, snapshot=true ->
-    def grgit = Grgit.open(dir: "../$projectName")
+    def grgit = Grgit.open(dir: file("../$projectName").absolutePath)
     def branch = grgit.branch.current().name
 
     // format: "TAG-DISTANCE-gHASH"
