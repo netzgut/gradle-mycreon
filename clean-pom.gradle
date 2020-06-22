@@ -83,7 +83,7 @@ task pom {
                                     it.appendNode('groupId', child.get('groupId').text().trim())
                                     it.appendNode('artifactId', child.get('artifactId').text().trim())
                                     it.appendNode('version', child.get('version').text().trim())
-                                    it.appendNode('scope', 'test')
+                                    it.appendNode('scope', 'tests')
                                     it.appendNode('type', 'test-jar')
                                 }
                             }
