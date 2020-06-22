@@ -110,7 +110,7 @@ task pom {
             def plugin = node.appendNode('build').appendNode('plugins').appendNode('plugin')
             plugin.appendNode('groupId').value = 'org.apache.maven.plugins'
             plugin.appendNode('artifactId').value = 'maven-compiler-plugin'
-            plugin.appendNode('version').value = '3.8.0'
+            plugin.appendNode('version').value = '3.8.1'
             def configuration = plugin.appendNode('configuration')
             if (project.sourceCompatibility.isJava10Compatible()) {
                 configuration.appendNode('source').value = project.sourceCompatibility.getMajorVersion()
