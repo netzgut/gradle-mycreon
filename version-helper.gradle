@@ -1,4 +1,4 @@
-// from: https://gist.github.com/michaellihs/a6621376393821d6d206ccfc8dbf86ec
+<>// from: https://gist.github.com/michaellihs/a6621376393821d6d206ccfc8dbf86ec
 
 buildscript {
     repositories {
@@ -97,6 +97,10 @@ ext.projectVersionHelper = { snapshot=true ->
     if (branch.startsWith("feature/")) {
         def feature = branch.substring("feature/".length())
         return "$version-$feature$SN"
+    } 
+    else if (branch.startsWith("PR-")) {
+        return "$version-$branch$SN"
+        
     }
     return "$version$SN"
 }
