@@ -1,0 +1,30 @@
+ext.deploy = { deployment ->
+    println "Deploying to ${deployment.servers.size()} Servers"
+    sleep(2000)
+    deployment.servers.eachWithIndex { _key, server, index ->
+        println "Deploying to $_key"
+        ssh.run {
+            session(server.remote) {
+                println "Moving server out of service..."
+                execute("touch ${server.folder}/app/haproxy-deactivate")
+                println "Waiting ${deployment.coolDownSec} for cool down..."
+                execute("sleep ${deployment.coolDownSec}")
+                println "Stopping docker container..."
+                execute("docker-compose -f ${server.folder}/docker-compose.yml stop");
+                println "Syncing files ..."
+                exec {
+                    executable 'rsync'
+                    args '-avz', '--delete', '--exclude=WEB-INF/tmp/', '-e', "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${server.remote.identity.absolutePath}", 'build/exploded/', "${server.server}:${server.folder}/app/"
+                }
+                println "Starting docker container"
+                execute("docker-compose -f ${server.folder}/docker-compose.yml up -d")
+                // last server no warmup
+                if (index != deployment.servers.size() - 1) {
+                    println "Waiting ${deployment.warmUpSec} seconds for server to warm up..."
+                    execute("sleep ${deployment.warmUpSec}")
+                }
+            }
+        }
+    }
+    println "DEPLOYMENT DONE!"
+}
